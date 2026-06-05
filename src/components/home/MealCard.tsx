@@ -25,7 +25,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
   const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
-  const canVote = meal.state === 'upcoming'
+  const canVote = meal.state === 'upcoming' || meal.state === 'tomorrow'
 
   async function handleVote(value: VoteValue | null) {
     const prev = myVote
