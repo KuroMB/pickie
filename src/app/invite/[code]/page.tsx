@@ -5,22 +5,18 @@ import type { Role } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function InvitePage({
-  params,
-  searchParams,
-}: {
-  params: { code: string }
-  searchParams: { role?: string }
-}) {
+export default async function InvitePage({ params }: { params: { code: string } }) {
   const code = params.code.toUpperCase().trim()
-  const role: Role = searchParams.role === 'planner' ? 'planner' : 'member'
-
   const service = createServiceClient()
-  const { data: household } = await service
-    .from('households')
-    .select('id, name')
-    .eq('invite_code', code)
-    .single()
+
+  // Which code was used determines the role — no client-supplied param
+  const [memberRes, plannerRes] = await Promise.all([
+    service.from('households').select('id, name').eq('invite_code', code).maybeSingle(),
+    service.from('households').select('id, name').eq('planner_invite_code', code).maybeSingle(),
+  ])
+
+  const household = memberRes.data ?? plannerRes.data
+  const role: Role = plannerRes.data ? 'planner' : 'member'
 
   if (!household) {
     redirect('/login?error=invalid_invite')
@@ -47,7 +43,6 @@ export default async function InvitePage({
   }
 
   const roleLabel = role === 'planner' ? 'planner (full edit access)' : 'member'
-  const inviteParam = role === 'planner' ? `/invite/${code}?role=planner` : `/invite/${code}`
 
   return (
     <div className="min-h-dvh bg-coral-50 flex flex-col items-center justify-center px-6">
@@ -60,7 +55,7 @@ export default async function InvitePage({
           <p className="text-2xl font-bold text-[#1A0A00] mb-1">{household.name}</p>
           <p className="text-xs text-[#1A0A00]/40 mb-6">as a {roleLabel}</p>
           <Link
-            href={`/login?next=${encodeURIComponent(inviteParam)}`}
+            href={`/login?next=${encodeURIComponent(`/invite/${code}`)}`}
             className="block w-full py-3 bg-coral-400 text-white font-medium rounded-xl text-sm"
           >
             sign in to join

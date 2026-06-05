@@ -42,8 +42,11 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
   const overlayRef = useRef<HTMLDivElement>(null)
   const isPlanner = profile.role === 'planner'
   const household = profile.household
-  const baseInviteUrl = household
+  const memberInviteUrl = household
     ? `${window.location.origin}/invite/${household.invite_code}`
+    : null
+  const plannerInviteUrl = household
+    ? `${window.location.origin}/invite/${household.planner_invite_code}`
     : null
 
   useEffect(() => {
@@ -99,18 +102,15 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
           </div>
 
           {/* invite section */}
-          {household && baseInviteUrl && (
+          {household && memberInviteUrl && plannerInviteUrl && (
             <div>
               <p className="text-xs font-semibold text-[#1A0A00]/50 uppercase tracking-wide mb-3">
                 invite family
               </p>
               <div className="space-y-3">
-                <CopyLinkRow label="member link (suggest & view)" url={baseInviteUrl} />
+                <CopyLinkRow label="member link (suggest & view)" url={memberInviteUrl} />
                 {isPlanner && (
-                  <CopyLinkRow
-                    label="planner link (full edit access)"
-                    url={`${baseInviteUrl}?role=planner`}
-                  />
+                  <CopyLinkRow label="planner link (full edit access)" url={plannerInviteUrl} />
                 )}
               </div>
               <p className="text-[11px] text-[#1A0A00]/30 mt-3 leading-relaxed">

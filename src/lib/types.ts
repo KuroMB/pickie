@@ -11,6 +11,7 @@ export interface Household {
   name: string
   created_at: string
   invite_code: string
+  planner_invite_code: string
 }
 
 export interface Profile {
