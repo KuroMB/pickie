@@ -146,8 +146,8 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
               <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">date</label>
               <input
                 type="date"
@@ -158,7 +158,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
                 className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400"
               />
             </div>
-            <div className="w-28">
+            <div>
               <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">cook time</label>
               <input
                 type="number"
