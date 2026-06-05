@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function OnboardPage() {
-  const [mode, setMode] = useState<'create' | 'join'>('join')
+  const [mode, setMode] = useState<'create' | 'join'>('create')
   const [householdName, setHouseholdName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
   const [role, setRole] = useState<'planner' | 'member'>('member')
