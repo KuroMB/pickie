@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import VoteButtons from '@/components/ui/VoteButtons'
 import { createClient } from '@/lib/supabase/client'
-import { formatShortDay, VOTE_EMOJI } from '@/lib/utils'
+import { formatShortDay, getLocalDateString, VOTE_EMOJI } from '@/lib/utils'
 import type { MealWithState, VoteValue } from '@/lib/types'
 
 interface MealCardProps {
@@ -23,9 +23,11 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
   const [tally, setTally] = useState(meal.voteTally)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [moving, setMoving] = useState(false)
   const supabase = createClient()
 
   const canVote = meal.state === 'upcoming' || meal.state === 'tomorrow'
+  const canMoveUp = meal.scheduled_date > getLocalDateString(0)
 
   async function handleVote(value: VoteValue | null) {
     const prev = myVote
@@ -61,36 +63,93 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
     onUpdate()
   }
 
+  async function moveDate(delta: 1 | -1) {
+    if (moving) return
+    setMoving(true)
+    const d = new Date(meal.scheduled_date + 'T12:00:00')
+    d.setDate(d.getDate() + delta)
+    const newDate = d.toISOString().split('T')[0]
+    await supabase.from('meals').update({ scheduled_date: newDate }).eq('id', meal.id)
+    setMoving(false)
+    onUpdate()
+  }
+
+  const cardContent = (
+    <>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium truncate leading-tight">{meal.name}</p>
+        {meal.description && !expanded && (
+          <p className="text-xs text-[#1A0A00]/40 truncate mt-0.5">{meal.description}</p>
+        )}
+      </div>
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        {tally.love > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>}
+        {tally.meh > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>}
+        {tally.nope > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>}
+        <svg
+          className={`w-4 h-4 text-[#1A0A00]/30 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </>
+  )
+
   return (
     <div className="bg-white rounded-2xl border border-coral-100 overflow-hidden">
-      <button
-        onClick={() => { setExpanded((e) => !e); setDeleteConfirm(false) }}
-        className="w-full px-4 py-3.5 flex items-center gap-3 text-left active:bg-coral-50/50 transition-colors"
-      >
-        <div className="flex-shrink-0 w-9 text-center">
-          <p className="text-[10px] font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
-            {formatShortDay(meal.scheduled_date)}
-          </p>
-          <span className="text-2xl leading-tight">{meal.emoji ?? '🍽️'}</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium truncate leading-tight">{meal.name}</p>
-          {meal.description && !expanded && (
-            <p className="text-xs text-[#1A0A00]/40 truncate mt-0.5">{meal.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {tally.love > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>}
-          {tally.meh > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>}
-          {tally.nope > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>}
-          <svg
-            className={`w-4 h-4 text-[#1A0A00]/30 transition-transform ${expanded ? 'rotate-180' : ''}`}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+      {isPlanner ? (
+        <div className="flex items-stretch">
+          {/* Left strip: up chevron / day+emoji / down chevron */}
+          <div className="flex-shrink-0 w-11 flex flex-col items-center pl-3 py-1.5">
+            <button
+              onClick={() => moveDate(-1)}
+              disabled={!canMoveUp || moving}
+              className="w-full flex justify-center py-1 rounded active:bg-coral-50 disabled:opacity-20 transition-opacity"
+            >
+              <svg className="w-3.5 h-3.5 text-[#1A0A00]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+              </svg>
+            </button>
+            <div className="flex flex-col items-center justify-center flex-1">
+              <p className="text-[10px] font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
+                {formatShortDay(meal.scheduled_date)}
+              </p>
+              <span className="text-xl leading-tight">{meal.emoji ?? '🍽️'}</span>
+            </div>
+            <button
+              onClick={() => moveDate(1)}
+              disabled={moving}
+              className="w-full flex justify-center py-1 rounded active:bg-coral-50 disabled:opacity-20 transition-opacity"
+            >
+              <svg className="w-3.5 h-3.5 text-[#1A0A00]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Expand/collapse button */}
+          <button
+            onClick={() => { setExpanded((e) => !e); setDeleteConfirm(false) }}
+            className="flex-1 pl-2 pr-4 py-3.5 flex items-center gap-2 text-left active:bg-coral-50/50 transition-colors"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
+            {cardContent}
+          </button>
         </div>
-      </button>
+      ) : (
+        <button
+          onClick={() => { setExpanded((e) => !e); setDeleteConfirm(false) }}
+          className="w-full px-4 py-3.5 flex items-center gap-3 text-left active:bg-coral-50/50 transition-colors"
+        >
+          <div className="flex-shrink-0 w-9 text-center">
+            <p className="text-[10px] font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
+              {formatShortDay(meal.scheduled_date)}
+            </p>
+            <span className="text-2xl leading-tight">{meal.emoji ?? '🍽️'}</span>
+          </div>
+          {cardContent}
+        </button>
+      )}
 
       {expanded && (
         <div className="px-4 pb-4 border-t border-coral-100">
