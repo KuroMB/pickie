@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const router = useRouter() // still used for signup redirect
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,8 +34,7 @@ export default function LoginPage() {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         if (!data.session) throw new Error('Sign in failed — please try again')
-        router.refresh()
-        router.push('/')
+        window.location.href = '/'
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
