@@ -14,12 +14,12 @@ export default function OnboardPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const supabase = createClient()
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not signed in')
@@ -49,6 +49,7 @@ export default function OnboardPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const supabase = createClient()
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not signed in')
