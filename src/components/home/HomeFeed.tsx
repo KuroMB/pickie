@@ -10,6 +10,7 @@ import SuggestionInbox from './SuggestionInbox'
 import SuggestionFooter from './SuggestionFooter'
 import AddMealModal from '@/components/planner/AddMealModal'
 import AdHocPollModal from '@/components/planner/AdHocPollModal'
+import SideDrawer from './SideDrawer'
 import type { Profile, Meal, Suggestion, MealWithState } from '@/lib/types'
 import { getLocalDateString } from '@/lib/utils'
 
@@ -31,6 +32,7 @@ export default function HomeFeed({
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles)
   const [showAddMeal, setShowAddMeal] = useState(false)
   const [showPoll, setShowPoll] = useState(false)
+  const [showDrawer, setShowDrawer] = useState(false)
   const supabase = createClient()
 
   const profile = initialProfile
@@ -106,31 +108,15 @@ export default function HomeFeed({
               </button>
             )}
             <button
-              onClick={signOut}
-              className="text-xs font-medium text-[#1A0A00]/40 px-3 py-1.5 rounded-full border border-[#1A0A00]/10 active:scale-95 transition-transform"
+              onClick={() => setShowDrawer(true)}
+              aria-label="menu"
+              className="w-8 h-8 rounded-full bg-coral-400 flex items-center justify-center text-white text-sm font-bold active:scale-95 transition-transform"
             >
-              sign out
+              {profile.name?.charAt(0).toUpperCase() ?? '?'}
             </button>
           </div>
         </div>
       </div>
-
-      {/* invite code for planners */}
-      {isPlanner && profile.household && (
-        <div className="max-w-mobile mx-auto px-4 pt-3 pb-1">
-          <div className="bg-coral-100 rounded-xl px-4 py-2 flex items-center justify-between">
-            <p className="text-xs text-[#1A0A00]/50">
-              invite code: <span className="font-medium tracking-widest text-coral-400">{profile.household.invite_code}</span>
-            </p>
-            <button
-              onClick={() => navigator.clipboard?.writeText(profile.household!.invite_code)}
-              className="text-[10px] font-medium text-coral-400 border border-coral-300 px-2 py-0.5 rounded-full active:scale-95 transition-transform"
-            >
-              copy
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* scrollable content */}
       <div className="max-w-mobile mx-auto pt-4 pb-28">
@@ -199,6 +185,14 @@ export default function HomeFeed({
       )}
 
       {showPoll && <AdHocPollModal onClose={() => setShowPoll(false)} />}
+
+      {showDrawer && (
+        <SideDrawer
+          profile={profile}
+          onClose={() => setShowDrawer(false)}
+          onSignOut={signOut}
+        />
+      )}
     </div>
   )
 }
