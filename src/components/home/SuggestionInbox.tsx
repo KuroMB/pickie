@@ -12,7 +12,7 @@ interface SuggestionInboxProps {
 const STATUS_LABEL: Record<SuggestionStatus, string> = {
   open: '',
   noted: 'noted',
-  added: 'added to rotation',
+  added: 'seen',
 }
 
 const STATUS_STYLE: Record<SuggestionStatus, string> = {
@@ -90,7 +90,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                     onClick={() => updateStatus(s.id, 'added')}
                     className="text-[11px] font-medium text-coral-400 border border-coral-300 px-3 py-1 rounded-full active:scale-95 transition-transform"
                   >
-                    add to rotation
+                    seen
                   </button>
                 )}
                 {s.status !== 'open' && (
