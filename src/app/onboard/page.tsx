@@ -18,22 +18,8 @@ export default function OnboardPage() {
     setLoading(true)
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not signed in')
-
-      const { data: household, error: hErr } = await supabase
-        .from('households')
-        .insert({ name: householdName })
-        .select()
-        .single()
-      if (hErr) throw hErr
-
-      const { error: pErr } = await supabase
-        .from('profiles')
-        .update({ household_id: household.id, role: 'planner' })
-        .eq('id', user.id)
-      if (pErr) throw pErr
-
+      const { error } = await supabase.rpc('create_household_and_join', { p_name: householdName })
+      if (error) throw error
       router.refresh()
       router.push('/home')
     } catch (err: unknown) {
