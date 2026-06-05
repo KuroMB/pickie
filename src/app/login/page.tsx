@@ -19,9 +19,9 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const supabase = createClient()
 
     try {
+      const supabase = createClient()
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email,
@@ -31,8 +31,10 @@ export default function LoginPage() {
         if (error) throw error
         router.push('/onboard')
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        if (!data.session) throw new Error('Sign in failed — please try again')
+        router.refresh()
         router.push('/')
       }
     } catch (err: unknown) {

@@ -19,8 +19,8 @@ export default function OnboardPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const supabase = createClient()
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not signed in')
 
@@ -37,6 +37,7 @@ export default function OnboardPage() {
         .eq('id', user.id)
       if (pErr) throw pErr
 
+      router.refresh()
       router.push('/home')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -49,8 +50,8 @@ export default function OnboardPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const supabase = createClient()
     try {
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not signed in')
 
@@ -67,6 +68,7 @@ export default function OnboardPage() {
         .eq('id', user.id)
       if (pErr) throw pErr
 
+      router.refresh()
       router.push('/home')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
