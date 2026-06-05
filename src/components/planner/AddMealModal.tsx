@@ -3,24 +3,25 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { DEFAULT_TASK_LABELS, getLocalDateString } from '@/lib/utils'
-import { sendNewMealEmail } from '@/lib/resend'
+import type { Meal } from '@/lib/types'
 
 interface AddMealModalProps {
   householdId: string
   userId: string
+  editMeal?: Meal
   onClose: () => void
   onAdded: () => void
 }
 
 const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔']
 
-export default function AddMealModal({ householdId, userId, onClose, onAdded }: AddMealModalProps) {
-  const minDate = getLocalDateString(1)
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [emoji, setEmoji] = useState('')
-  const [date, setDate] = useState(minDate)
-  const [cookTime, setCookTime] = useState('')
+export default function AddMealModal({ householdId, userId, editMeal, onClose, onAdded }: AddMealModalProps) {
+  const today = getLocalDateString(0)
+  const [name, setName] = useState(editMeal?.name ?? '')
+  const [description, setDescription] = useState(editMeal?.description ?? '')
+  const [emoji, setEmoji] = useState(editMeal?.emoji ?? '')
+  const [date, setDate] = useState(editMeal?.scheduled_date ?? today)
+  const [cookTime, setCookTime] = useState(editMeal?.cook_time_minutes?.toString() ?? '')
   const [customTasks, setCustomTasks] = useState(DEFAULT_TASK_LABELS.join('\n'))
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
@@ -31,42 +32,45 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
     setSaving(true)
 
     try {
-      const { data: meal, error: mErr } = await supabase
-        .from('meals')
-        .insert({
-          household_id: householdId,
-          name: name.trim(),
-          description: description.trim() || null,
-          emoji: emoji || null,
-          scheduled_date: date,
-          cook_time_minutes: cookTime ? parseInt(cookTime, 10) : null,
-          created_by: userId,
+      if (editMeal) {
+        const { error } = await supabase.rpc('update_meal', {
+          p_meal_id: editMeal.id,
+          p_name: name.trim(),
+          p_description: description.trim() || null,
+          p_emoji: emoji || null,
+          p_scheduled_date: date,
+          p_cook_time_minutes: cookTime ? parseInt(cookTime, 10) : null,
         })
-        .select()
-        .single()
-      if (mErr) throw mErr
-
-      const taskLabels = customTasks
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-
-      if (taskLabels.length > 0) {
-        await supabase.from('tasks').insert(
-          taskLabels.map((label) => ({
-            meal_id: meal.id,
+        if (error) throw error
+      } else {
+        const { data: meal, error: mErr } = await supabase
+          .from('meals')
+          .insert({
             household_id: householdId,
-            label,
-          }))
-        )
-      }
+            name: name.trim(),
+            description: description.trim() || null,
+            emoji: emoji || null,
+            scheduled_date: date,
+            cook_time_minutes: cookTime ? parseInt(cookTime, 10) : null,
+            created_by: userId,
+          })
+          .select()
+          .single()
+        if (mErr) throw mErr
 
-      // fire notification via API route (server-side Resend call)
-      await fetch('/api/notifications/new-meal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mealId: meal.id }),
-      })
+        const taskLabels = customTasks.split('\n').map((l) => l.trim()).filter(Boolean)
+        if (taskLabels.length > 0) {
+          await supabase.from('tasks').insert(
+            taskLabels.map((label) => ({ meal_id: meal.id, household_id: householdId, label }))
+          )
+        }
+
+        await fetch('/api/notifications/new-meal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mealId: meal.id }),
+        })
+      }
 
       onAdded()
       onClose()
@@ -81,7 +85,7 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
       <div className="w-full max-w-mobile bg-white rounded-t-3xl px-5 pt-5 pb-safe max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold">add a meal</h2>
+          <h2 className="text-lg font-bold">{editMeal ? 'edit meal' : 'add a meal'}</h2>
           <button onClick={onClose} className="text-[#1A0A00]/40 p-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -111,9 +115,7 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
                   type="button"
                   onClick={() => setEmoji(e)}
                   className={`text-xl p-1.5 rounded-lg border transition-all ${
-                    emoji === e
-                      ? 'border-coral-400 bg-coral-100'
-                      : 'border-coral-100 bg-coral-50'
+                    emoji === e ? 'border-coral-400 bg-coral-100' : 'border-coral-100 bg-coral-50'
                   }`}
                 >
                   {e}
@@ -149,7 +151,7 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
               <input
                 type="date"
                 value={date}
-                min={minDate}
+                min={editMeal ? undefined : today}
                 onChange={(e) => setDate(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400"
@@ -169,15 +171,17 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">tasks (one per line)</label>
-            <textarea
-              value={customTasks}
-              onChange={(e) => setCustomTasks(e.target.value)}
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 resize-none"
-            />
-          </div>
+          {!editMeal && (
+            <div>
+              <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">tasks (one per line)</label>
+              <textarea
+                value={customTasks}
+                onChange={(e) => setCustomTasks(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 resize-none"
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-1">
             <button
@@ -192,7 +196,7 @@ export default function AddMealModal({ householdId, userId, onClose, onAdded }: 
               disabled={saving || !name.trim()}
               className="flex-1 py-3 bg-coral-400 text-white font-medium rounded-xl text-sm disabled:opacity-50 active:scale-[0.98] transition-transform"
             >
-              {saving ? 'adding…' : 'add meal'}
+              {saving ? '…' : editMeal ? 'save changes' : 'add meal'}
             </button>
           </div>
         </form>

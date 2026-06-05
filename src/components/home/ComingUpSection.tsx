@@ -11,6 +11,7 @@ interface ComingUpSectionProps {
   profiles: Profile[]
   onAddMeal: () => void
   onUpdate: () => void
+  onEditMeal: (meal: MealWithState) => void
 }
 
 export default function ComingUpSection({
@@ -20,6 +21,7 @@ export default function ComingUpSection({
   isPlanner,
   onAddMeal,
   onUpdate,
+  onEditMeal,
 }: ComingUpSectionProps) {
   if (meals.length === 0 && !isPlanner) {
     return (
@@ -62,6 +64,7 @@ export default function ComingUpSection({
             householdId={householdId}
             isPlanner={isPlanner}
             onUpdate={onUpdate}
+            onEdit={onEditMeal}
           />
         ))}
         {meals.length === 0 && (

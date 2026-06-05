@@ -12,14 +12,17 @@ interface MealCardProps {
   householdId: string
   isPlanner: boolean
   onUpdate: () => void
+  onEdit: (meal: MealWithState) => void
 }
 
-export default function MealCard({ meal, userId, householdId, isPlanner, onUpdate }: MealCardProps) {
+export default function MealCard({ meal, userId, householdId, isPlanner, onUpdate, onEdit }: MealCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [remix, setRemix] = useState('')
   const [sendingRemix, setSendingRemix] = useState(false)
   const [myVote, setMyVote] = useState<VoteValue | null>(meal.myVote ?? null)
   const [tally, setTally] = useState(meal.voteTally)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
   const canVote = meal.state === 'upcoming'
@@ -33,16 +36,10 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
       if (value) next[value]++
       return next
     })
-
     if (prev && !value) {
       await supabase.from('votes').delete().eq('meal_id', meal.id).eq('user_id', userId)
     } else if (value) {
-      await supabase.from('votes').upsert({
-        meal_id: meal.id,
-        user_id: userId,
-        household_id: householdId,
-        value,
-      })
+      await supabase.from('votes').upsert({ meal_id: meal.id, user_id: userId, household_id: householdId, value })
     }
   }
 
@@ -50,21 +47,24 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
     if (!remix.trim()) return
     setSendingRemix(true)
     await supabase.from('suggestions').insert({
-      meal_id: meal.id,
-      household_id: householdId,
-      submitted_by: userId,
-      type: 'remix',
-      text: remix.trim(),
+      meal_id: meal.id, household_id: householdId, submitted_by: userId, type: 'remix', text: remix.trim(),
     })
     setRemix('')
     setSendingRemix(false)
     onUpdate()
   }
 
+  async function handleDelete() {
+    if (!deleteConfirm) { setDeleteConfirm(true); return }
+    setDeleting(true)
+    await supabase.rpc('delete_meal', { p_meal_id: meal.id })
+    onUpdate()
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-coral-100 overflow-hidden">
       <button
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => { setExpanded((e) => !e); setDeleteConfirm(false) }}
         className="w-full px-4 py-3.5 flex items-center gap-3 text-left active:bg-coral-50/50 transition-colors"
       >
         <div className="flex-shrink-0 w-9 text-center">
@@ -80,21 +80,12 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
           )}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {tally.love > 0 && (
-            <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>
-          )}
-          {tally.meh > 0 && (
-            <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>
-          )}
-          {tally.nope > 0 && (
-            <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>
-          )}
+          {tally.love > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>}
+          {tally.meh > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>}
+          {tally.nope > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>}
           <svg
             className={`w-4 h-4 text-[#1A0A00]/30 transition-transform ${expanded ? 'rotate-180' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -109,11 +100,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
 
           {canVote ? (
             <>
-              <VoteButtons
-                value={myVote}
-                onVote={handleVote}
-                tally={tally}
-              />
+              <VoteButtons value={myVote} onVote={handleVote} tally={tally} />
               <div className="mt-3 flex gap-2">
                 <input
                   type="text"
@@ -134,12 +121,32 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
             </>
           ) : (
             <div className="pt-3">
-              <p className="text-xs text-[#1A0A00]/40 text-center py-2">
-                voting closed
-              </p>
+              <p className="text-xs text-[#1A0A00]/40 text-center py-2">voting closed</p>
               <div className="flex gap-2 mt-1">
                 <VoteButtons value={null} onVote={() => {}} tally={tally} disabled />
               </div>
+            </div>
+          )}
+
+          {isPlanner && (
+            <div className="mt-3 pt-3 border-t border-coral-100 flex gap-2 justify-end">
+              <button
+                onClick={() => onEdit(meal)}
+                className="text-xs font-medium text-[#1A0A00]/40 px-3 py-1.5 rounded-lg border border-[#1A0A00]/10 active:scale-95 transition-transform"
+              >
+                edit
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all active:scale-95 ${
+                  deleteConfirm
+                    ? 'text-white bg-red-500 border-red-500'
+                    : 'text-red-400 border-red-200'
+                }`}
+              >
+                {deleting ? '…' : deleteConfirm ? 'tap to confirm' : 'delete'}
+              </button>
             </div>
           )}
         </div>

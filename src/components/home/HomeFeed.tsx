@@ -31,6 +31,7 @@ export default function HomeFeed({
   const [suggestions, setSuggestions] = useState<Suggestion[]>(initialSuggestions)
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles)
   const [showAddMeal, setShowAddMeal] = useState(false)
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [showPoll, setShowPoll] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
   const supabase = createClient()
@@ -134,14 +135,18 @@ export default function HomeFeed({
             meal={tonightMeal}
             profiles={profiles}
             userId={profile.id}
+            isPlanner={isPlanner}
             onUpdate={reload}
+            onEdit={setEditingMeal}
           />
         ) : tomorrowMeal ? (
           <TonightHeroCard
             meal={tomorrowMeal}
             profiles={profiles}
             userId={profile.id}
+            isPlanner={isPlanner}
             onUpdate={reload}
+            onEdit={setEditingMeal}
           />
         ) : (
           <div className="mx-4 mb-4">
@@ -160,6 +165,7 @@ export default function HomeFeed({
           profiles={profiles}
           onAddMeal={() => setShowAddMeal(true)}
           onUpdate={reload}
+          onEditMeal={setEditingMeal}
         />
 
         <SuggestionInbox
@@ -181,6 +187,16 @@ export default function HomeFeed({
           userId={profile.id}
           onClose={() => setShowAddMeal(false)}
           onAdded={reload}
+        />
+      )}
+
+      {editingMeal && (
+        <AddMealModal
+          householdId={householdId}
+          userId={profile.id}
+          editMeal={editingMeal}
+          onClose={() => setEditingMeal(null)}
+          onAdded={() => { reload(); setEditingMeal(null) }}
         />
       )}
 
