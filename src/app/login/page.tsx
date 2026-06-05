@@ -21,8 +21,8 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
       if (mode === 'signup') {
+        const supabase = createClient()
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -31,9 +31,13 @@ export default function LoginPage() {
         if (error) throw error
         router.push('/onboard')
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) throw error
-        if (!data.session) throw new Error('Sign in failed — please try again')
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error ?? 'Sign in failed')
         window.location.href = '/'
       }
     } catch (err: unknown) {
