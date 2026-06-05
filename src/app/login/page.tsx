@@ -31,13 +31,9 @@ export default function LoginPage() {
         if (error) throw error
         router.push('/onboard')
       } else {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        })
-        const json = await res.json()
-        if (!res.ok) throw new Error(json.error ?? 'Sign in failed')
+        const supabase = createClient()
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) throw error
         window.location.href = '/'
       }
     } catch (err: unknown) {
