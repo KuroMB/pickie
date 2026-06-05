@@ -1,13 +1,20 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import type { Role } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function InvitePage({ params }: { params: { code: string } }) {
+export default async function InvitePage({
+  params,
+  searchParams,
+}: {
+  params: { code: string }
+  searchParams: { role?: string }
+}) {
   const code = params.code.toUpperCase().trim()
+  const role: Role = searchParams.role === 'planner' ? 'planner' : 'member'
 
-  // Use service client so RLS doesn't block the household lookup
   const service = createServiceClient()
   const { data: household } = await service
     .from('households')
@@ -32,14 +39,16 @@ export default async function InvitePage({ params }: { params: { code: string } 
     if (!profile?.household_id) {
       await supabase
         .from('profiles')
-        .update({ household_id: household.id, role: 'member' })
+        .update({ household_id: household.id, role })
         .eq('id', user.id)
     }
 
     redirect('/home')
   }
 
-  // Not signed in — show landing page
+  const roleLabel = role === 'planner' ? 'planner (full edit access)' : 'member'
+  const inviteParam = role === 'planner' ? `/invite/${code}?role=planner` : `/invite/${code}`
+
   return (
     <div className="min-h-dvh bg-coral-50 flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
@@ -48,9 +57,10 @@ export default async function InvitePage({ params }: { params: { code: string } 
 
         <div className="bg-white rounded-2xl shadow-sm border border-coral-100 p-6 text-center">
           <p className="text-sm text-[#1A0A00]/50 mb-1">you've been invited to join</p>
-          <p className="text-2xl font-bold text-[#1A0A00] mb-6">{household.name}</p>
+          <p className="text-2xl font-bold text-[#1A0A00] mb-1">{household.name}</p>
+          <p className="text-xs text-[#1A0A00]/40 mb-6">as a {roleLabel}</p>
           <Link
-            href={`/login?next=/invite/${code}`}
+            href={`/login?next=${encodeURIComponent(inviteParam)}`}
             className="block w-full py-3 bg-coral-400 text-white font-medium rounded-xl text-sm"
           >
             sign in to join
