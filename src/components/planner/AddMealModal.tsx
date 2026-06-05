@@ -9,18 +9,19 @@ interface AddMealModalProps {
   householdId: string
   userId: string
   editMeal?: Meal
+  initialDate?: string
   onClose: () => void
   onAdded: () => void
 }
 
 const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔']
 
-export default function AddMealModal({ householdId, userId, editMeal, onClose, onAdded }: AddMealModalProps) {
+export default function AddMealModal({ householdId, userId, editMeal, initialDate, onClose, onAdded }: AddMealModalProps) {
   const today = getLocalDateString(0)
   const [name, setName] = useState(editMeal?.name ?? '')
   const [description, setDescription] = useState(editMeal?.description ?? '')
   const [emoji, setEmoji] = useState(editMeal?.emoji ?? '')
-  const [date, setDate] = useState(editMeal?.scheduled_date ?? today)
+  const [date, setDate] = useState(editMeal?.scheduled_date ?? initialDate ?? today)
   const [cookTime, setCookTime] = useState(editMeal?.cook_time_minutes?.toString() ?? '')
   const [customTasks, setCustomTasks] = useState(DEFAULT_TASK_LABELS.join('\n'))
   const [saving, setSaving] = useState(false)

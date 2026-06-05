@@ -31,6 +31,7 @@ export default function HomeFeed({
   const [suggestions, setSuggestions] = useState<Suggestion[]>(initialSuggestions)
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles)
   const [showAddMeal, setShowAddMeal] = useState(false)
+  const [addMealDate, setAddMealDate] = useState<string | undefined>(undefined)
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [showPoll, setShowPoll] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
@@ -163,7 +164,7 @@ export default function HomeFeed({
           householdId={householdId}
           isPlanner={isPlanner}
           profiles={profiles}
-          onAddMeal={() => setShowAddMeal(true)}
+          onAddMeal={(date) => { setAddMealDate(date); setShowAddMeal(true) }}
           onUpdate={reload}
           onEditMeal={setEditingMeal}
         />
@@ -185,7 +186,8 @@ export default function HomeFeed({
         <AddMealModal
           householdId={householdId}
           userId={profile.id}
-          onClose={() => setShowAddMeal(false)}
+          initialDate={addMealDate}
+          onClose={() => { setShowAddMeal(false); setAddMealDate(undefined) }}
           onAdded={reload}
         />
       )}
