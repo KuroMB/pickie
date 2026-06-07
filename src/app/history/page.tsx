@@ -45,13 +45,14 @@ function scoreEmoji(score: number): string {
 
 export default async function HistoryPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+  if (!userId) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('household_id, role')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single()
 
   if (!profile?.household_id) redirect('/onboard')

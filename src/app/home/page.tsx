@@ -8,13 +8,17 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+
+  // getSession reads from cookies (no network call) — middleware already
+  // validated the session, so this is safe and saves one round-trip to Supabase.
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+  if (!userId) redirect('/login')
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('*, household:households(*)')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single()
 
   if (!profile?.household_id) redirect('/onboard')
