@@ -32,8 +32,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ sent: 0 })
   }
 
-  const pollId = crypto.randomUUID()
-  await sendAdHocPollEmail(members, question, optionA, optionB, pollId)
+  const { data: poll, error: pollErr } = await service
+    .from('polls')
+    .insert({
+      household_id: profile.household_id,
+      created_by: user.id,
+      question,
+      option_a: optionA,
+      option_b: optionB,
+    })
+    .select()
+    .single()
+  if (pollErr || !poll) return NextResponse.json({ error: 'failed to create poll' }, { status: 500 })
+
+  await sendAdHocPollEmail(members, question, optionA, optionB, poll.id)
 
   await service.from('notification_log').insert({
     household_id: profile.household_id,

@@ -107,3 +107,24 @@ export interface MealWithState extends Meal {
   myRating?: number | null
   voteTally: { love: number; meh: number; nope: number }
 }
+
+export interface Poll {
+  id: string
+  household_id: string
+  created_by: string
+  question: string
+  option_a: string
+  option_b: string
+  closed: boolean
+  created_at: string
+  responses?: PollResponse[]
+}
+
+export interface PollResponse {
+  id: string
+  poll_id: string
+  user_id: string
+  household_id: string
+  choice: 'a' | 'b'
+  created_at: string
+}

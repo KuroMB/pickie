@@ -8,10 +8,11 @@ import TonightHeroCard from './TonightHeroCard'
 import ComingUpSection from './ComingUpSection'
 import SuggestionInbox from './SuggestionInbox'
 import SuggestionFooter from './SuggestionFooter'
+import PollCard from './PollCard'
 import AddMealModal from '@/components/planner/AddMealModal'
 import AdHocPollModal from '@/components/planner/AdHocPollModal'
 import SideDrawer from './SideDrawer'
-import type { Profile, Meal, Suggestion, MealWithState } from '@/lib/types'
+import type { Profile, Meal, Suggestion, MealWithState, Poll } from '@/lib/types'
 import { getLocalDateString } from '@/lib/utils'
 
 interface HomeFeedProps {
@@ -19,6 +20,7 @@ interface HomeFeedProps {
   initialMeals: Meal[]
   initialSuggestions: Suggestion[]
   initialProfiles: Profile[]
+  initialPolls: Poll[]
 }
 
 export default function HomeFeed({
@@ -26,10 +28,12 @@ export default function HomeFeed({
   initialMeals,
   initialSuggestions,
   initialProfiles,
+  initialPolls,
 }: HomeFeedProps) {
   const [meals, setMeals] = useState<Meal[]>(initialMeals)
   const [suggestions, setSuggestions] = useState<Suggestion[]>(initialSuggestions)
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles)
+  const [polls, setPolls] = useState<Poll[]>(initialPolls)
   const [showAddMeal, setShowAddMeal] = useState(false)
   const [addMealDate, setAddMealDate] = useState<string | undefined>(undefined)
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
@@ -45,7 +49,7 @@ export default function HomeFeed({
     const today = getLocalDateString(0)
     const yesterday = getLocalDateString(-1)
 
-    const [mealsRes, suggestionsRes, profilesRes] = await Promise.all([
+    const [mealsRes, suggestionsRes, profilesRes, pollsRes] = await Promise.all([
       supabase
         .from('meals')
         .select('*, tasks(*), votes(*), ratings(*)')
@@ -61,11 +65,18 @@ export default function HomeFeed({
         .from('profiles')
         .select('*')
         .eq('household_id', householdId),
+      supabase
+        .from('polls')
+        .select('*, responses:poll_responses(*)')
+        .eq('household_id', householdId)
+        .eq('closed', false)
+        .order('created_at', { ascending: false }),
     ])
 
     if (mealsRes.data) setMeals(mealsRes.data as Meal[])
     if (suggestionsRes.data) setSuggestions(suggestionsRes.data as Suggestion[])
     if (profilesRes.data) setProfiles(profilesRes.data as Profile[])
+    if (pollsRes.data) setPolls(pollsRes.data as Poll[])
   }, [supabase, householdId])
 
   // real-time subscriptions
@@ -77,6 +88,8 @@ export default function HomeFeed({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'suggestions', filter: `household_id=eq.${householdId}` }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'meals', filter: `household_id=eq.${householdId}` }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ratings', filter: `household_id=eq.${householdId}` }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'polls', filter: `household_id=eq.${householdId}` }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'poll_responses', filter: `household_id=eq.${householdId}` }, reload)
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
@@ -157,6 +170,17 @@ export default function HomeFeed({
             </div>
           </div>
         )}
+
+        {polls.map((poll) => (
+          <PollCard
+            key={poll.id}
+            poll={poll}
+            userId={profile.id}
+            householdId={householdId}
+            isPlanner={isPlanner}
+            onUpdate={reload}
+          />
+        ))}
 
         <ComingUpSection
           meals={upcomingMeals}
