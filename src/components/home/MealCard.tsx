@@ -77,10 +77,15 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
     onUpdate()
   }
 
+  const typeEmoji = meal.meal_type === 'lunch' ? '☀️' : meal.meal_type === 'breakfast' ? '🌅' : null
+
   const cardContent = (
     <>
       <div className="min-w-0 flex-1">
-        <p className="text-base font-medium truncate leading-tight">{meal.name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-base font-medium truncate leading-tight">{meal.name}</p>
+          {typeEmoji && <span className="text-sm flex-shrink-0">{typeEmoji}</span>}
+        </div>
         {meal.description && !expanded && (
           <p className="text-sm text-[#1A0A00]/40 truncate mt-0.5">{meal.description}</p>
         )}

@@ -65,7 +65,16 @@ export default function TonightHeroCard({ meal, profiles, userId, isPlanner, onU
           </div>
         )}
 
-        <p className="text-sm font-medium text-white/60 uppercase tracking-widest mb-3">tonight</p>
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-sm font-medium text-white/60 uppercase tracking-widest">
+            {meal.state === 'tomorrow' ? 'tomorrow' : 'tonight'}
+          </p>
+          {meal.meal_type !== 'dinner' && (
+            <span className="text-xs font-medium text-white/50 bg-white/10 px-2 py-0.5 rounded-full">
+              {meal.meal_type === 'lunch' ? '☀️' : '🌅'} {meal.meal_type}
+            </span>
+          )}
+        </div>
         <div className="flex items-start gap-3 mb-1">
           <span className="text-5xl leading-none">{meal.emoji ?? '🍽️'}</span>
           <div className="min-w-0 flex-1">

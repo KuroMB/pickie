@@ -26,6 +26,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
   const [emoji, setEmoji] = useState(editMeal?.emoji ?? '')
   const [date, setDate] = useState(editMeal?.scheduled_date ?? initialDate ?? today)
   const [cookTime, setCookTime] = useState(editMeal?.cook_time_minutes?.toString() ?? '')
+  const [mealType, setMealType] = useState<'dinner' | 'lunch' | 'breakfast'>(editMeal?.meal_type ?? 'dinner')
   const [customTasks, setCustomTasks] = useState(DEFAULT_TASK_LABELS.join('\n'))
   const [showCustomEmoji, setShowCustomEmoji] = useState(!EMOJI_SUGGESTIONS.includes(editMeal?.emoji ?? ''))
   const [saving, setSaving] = useState(false)
@@ -47,6 +48,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
           p_cook_time_minutes: cookTime ? parseInt(cookTime, 10) : null,
         })
         if (error) throw error
+        await supabase.from('meals').update({ meal_type: mealType }).eq('id', editMeal.id)
       } else {
         const { data: meal, error: mErr } = await supabase
           .from('meals')
@@ -56,6 +58,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
             description: description.trim() || null,
             emoji: emoji || null,
             scheduled_date: date,
+            meal_type: mealType,
             cook_time_minutes: cookTime ? parseInt(cookTime, 10) : null,
             created_by: userId,
           })
@@ -109,6 +112,29 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
               placeholder="e.g. Spaghetti Bolognese"
               className={inputClass}
             />
+          </div>
+
+          <div>
+            <label className={labelClass}>type</label>
+            <div className="flex gap-2">
+              {(['dinner', 'lunch', 'breakfast'] as const).map((t) => {
+                const emoji = t === 'dinner' ? '🌙' : t === 'lunch' ? '☀️' : '🌅'
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setMealType(t)}
+                    className={`flex-1 py-2.5 rounded-xl border text-base font-medium transition-all ${
+                      mealType === t
+                        ? 'border-coral-400 bg-coral-100 text-coral-500'
+                        : 'border-coral-200 bg-coral-50 text-[#1A0A00]/50'
+                    }`}
+                  >
+                    {emoji} {t}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <div>
