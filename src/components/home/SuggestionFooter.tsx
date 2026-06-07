@@ -37,12 +37,12 @@ export default function SuggestionFooter({ userId, householdId, onSent }: Sugges
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
           placeholder="suggest a dinner idea"
-          className="flex-1 px-4 py-2.5 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
         />
         <button
           onClick={send}
           disabled={!text.trim() || sending}
-          className="px-4 py-2.5 bg-coral-400 text-white text-sm font-medium rounded-xl disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
+          className="px-4 py-2.5 bg-coral-400 text-white text-base font-medium rounded-xl disabled:opacity-40 active:scale-95 transition-transform flex-shrink-0"
         >
           send
         </button>

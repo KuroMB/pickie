@@ -65,16 +65,16 @@ export default function TonightHeroCard({ meal, profiles, userId, isPlanner, onU
           </div>
         )}
 
-        <p className="text-xs font-medium text-white/60 uppercase tracking-widest mb-3">tonight</p>
+        <p className="text-sm font-medium text-white/60 uppercase tracking-widest mb-3">tonight</p>
         <div className="flex items-start gap-3 mb-1">
           <span className="text-5xl leading-none">{meal.emoji ?? '🍽️'}</span>
           <div className="min-w-0 flex-1">
             <h2 className="text-2xl font-bold leading-tight">{meal.name}</h2>
             {meal.description && (
-              <p className="text-sm text-white/70 mt-1 leading-snug">{meal.description}</p>
+              <p className="text-base text-white/70 mt-1 leading-snug">{meal.description}</p>
             )}
             {meal.cook_time_minutes && (
-              <p className="text-xs text-white/50 mt-2">⏱ {formatCookTime(meal.cook_time_minutes)}</p>
+              <p className="text-sm text-white/50 mt-2">⏱ {formatCookTime(meal.cook_time_minutes)}</p>
             )}
           </div>
         </div>

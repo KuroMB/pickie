@@ -68,7 +68,10 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
     setMoving(true)
     const d = new Date(meal.scheduled_date + 'T12:00:00')
     d.setDate(d.getDate() + delta)
-    const newDate = d.toISOString().split('T')[0]
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const newDate = `${year}-${month}-${day}`
     await supabase.from('meals').update({ scheduled_date: newDate }).eq('id', meal.id)
     setMoving(false)
     onUpdate()
@@ -77,15 +80,15 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
   const cardContent = (
     <>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium truncate leading-tight">{meal.name}</p>
+        <p className="text-base font-medium truncate leading-tight">{meal.name}</p>
         {meal.description && !expanded && (
-          <p className="text-xs text-[#1A0A00]/40 truncate mt-0.5">{meal.description}</p>
+          <p className="text-sm text-[#1A0A00]/40 truncate mt-0.5">{meal.description}</p>
         )}
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        {tally.love > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>}
-        {tally.meh > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>}
-        {tally.nope > 0 && <span className="text-xs text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>}
+        {tally.love > 0 && <span className="text-sm text-[#1A0A00]/50">{VOTE_EMOJI.love}{tally.love}</span>}
+        {tally.meh > 0 && <span className="text-sm text-[#1A0A00]/50">{VOTE_EMOJI.meh}{tally.meh}</span>}
+        {tally.nope > 0 && <span className="text-sm text-[#1A0A00]/50">{VOTE_EMOJI.nope}{tally.nope}</span>}
         <svg
           className={`w-4 h-4 text-[#1A0A00]/30 transition-transform ${expanded ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -100,7 +103,6 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
     <div className="bg-white rounded-2xl border border-coral-100 overflow-hidden">
       {isPlanner ? (
         <div className="flex items-stretch">
-          {/* Left strip: up chevron / day+emoji / down chevron */}
           <div className="flex-shrink-0 w-11 flex flex-col items-center pl-3 py-1.5">
             <button
               onClick={() => moveDate(-1)}
@@ -112,7 +114,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
               </svg>
             </button>
             <div className="flex flex-col items-center justify-center flex-1">
-              <p className="text-[10px] font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
+              <p className="text-xs font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
                 {formatShortDay(meal.scheduled_date)}
               </p>
               <span className="text-xl leading-tight">{meal.emoji ?? '🍽️'}</span>
@@ -127,8 +129,6 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
               </svg>
             </button>
           </div>
-
-          {/* Expand/collapse button */}
           <button
             onClick={() => { setExpanded((e) => !e); setDeleteConfirm(false) }}
             className="flex-1 pl-2 pr-4 py-3.5 flex items-center gap-2 text-left active:bg-coral-50/50 transition-colors"
@@ -142,7 +142,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
           className="w-full px-4 py-3.5 flex items-center gap-3 text-left active:bg-coral-50/50 transition-colors"
         >
           <div className="flex-shrink-0 w-9 text-center">
-            <p className="text-[10px] font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
+            <p className="text-xs font-medium text-[#1A0A00]/40 uppercase tracking-wide leading-none">
               {formatShortDay(meal.scheduled_date)}
             </p>
             <span className="text-2xl leading-tight">{meal.emoji ?? '🍽️'}</span>
@@ -154,7 +154,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
       {expanded && (
         <div className="px-4 pb-4 border-t border-coral-100">
           {meal.description && (
-            <p className="text-sm text-[#1A0A00]/60 pt-3 pb-3 leading-relaxed">{meal.description}</p>
+            <p className="text-base text-[#1A0A00]/60 pt-3 pb-3 leading-relaxed">{meal.description}</p>
           )}
 
           {canVote ? (
@@ -167,12 +167,12 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
                   onChange={(e) => setRemix(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendRemix()}
                   placeholder="suggest a remix…"
-                  className="flex-1 px-3 py-2.5 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+                  className="flex-1 px-3 py-2.5 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
                 />
                 <button
                   onClick={sendRemix}
                   disabled={!remix.trim() || sendingRemix}
-                  className="px-4 py-2.5 bg-coral-400 text-white text-sm font-medium rounded-xl disabled:opacity-40 active:scale-95 transition-transform"
+                  className="px-4 py-2.5 bg-coral-400 text-white text-base font-medium rounded-xl disabled:opacity-40 active:scale-95 transition-transform"
                 >
                   send
                 </button>
@@ -180,7 +180,7 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
             </>
           ) : (
             <div className="pt-3">
-              <p className="text-xs text-[#1A0A00]/40 text-center py-2">voting closed</p>
+              <p className="text-sm text-[#1A0A00]/40 text-center py-2">voting closed</p>
               <div className="flex gap-2 mt-1">
                 <VoteButtons value={null} onVote={() => {}} tally={tally} disabled />
               </div>
@@ -191,14 +191,14 @@ export default function MealCard({ meal, userId, householdId, isPlanner, onUpdat
             <div className="mt-3 pt-3 border-t border-coral-100 flex gap-2 justify-end">
               <button
                 onClick={() => onEdit(meal)}
-                className="text-xs font-medium text-[#1A0A00]/40 px-3 py-1.5 rounded-lg border border-[#1A0A00]/10 active:scale-95 transition-transform"
+                className="text-sm font-medium text-[#1A0A00]/40 px-3 py-1.5 rounded-lg border border-[#1A0A00]/10 active:scale-95 transition-transform"
               >
                 edit
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all active:scale-95 ${
+                className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition-all active:scale-95 ${
                   deleteConfirm
                     ? 'text-white bg-red-500 border-red-500'
                     : 'text-red-400 border-red-200'

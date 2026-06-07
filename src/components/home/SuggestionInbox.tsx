@@ -36,7 +36,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
           suggestions
         </p>
         <div className="bg-coral-50 rounded-2xl px-4 py-6 text-center border border-coral-100">
-          <p className="text-sm text-[#1A0A00]/40">no suggestions yet — use the field below</p>
+          <p className="text-base text-[#1A0A00]/40">no suggestions yet — use the field below</p>
         </div>
       </div>
     )
@@ -55,7 +55,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-[#1A0A00]/40 mb-1 leading-none">
+                <p className="text-sm text-[#1A0A00]/40 mb-1 leading-none">
                   <span className="font-medium text-[#1A0A00]/60">
                     {s.submitter?.name ?? 'someone'}
                   </span>
@@ -66,10 +66,10 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                     'general'
                   )}
                 </p>
-                <p className="text-sm text-[#1A0A00]/80 leading-snug">{s.text}</p>
+                <p className="text-base text-[#1A0A00]/80 leading-snug">{s.text}</p>
               </div>
               {s.status !== 'open' && (
-                <span className={`flex-shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full ${STATUS_STYLE[s.status]}`}>
+                <span className={`flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLE[s.status]}`}>
                   {STATUS_LABEL[s.status]}
                 </span>
               )}
@@ -80,7 +80,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                 {s.status !== 'noted' && (
                   <button
                     onClick={() => updateStatus(s.id, 'noted')}
-                    className="text-[11px] font-medium text-[#1A0A00]/50 border border-[#1A0A00]/15 px-3 py-1 rounded-full hover:border-[#1A0A00]/25 active:scale-95 transition-transform"
+                    className="text-sm font-medium text-[#1A0A00]/50 border border-[#1A0A00]/15 px-3 py-1 rounded-full hover:border-[#1A0A00]/25 active:scale-95 transition-transform"
                   >
                     noted
                   </button>
@@ -88,7 +88,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                 {s.status !== 'added' && (
                   <button
                     onClick={() => updateStatus(s.id, 'added')}
-                    className="text-[11px] font-medium text-coral-400 border border-coral-300 px-3 py-1 rounded-full active:scale-95 transition-transform"
+                    className="text-sm font-medium text-coral-400 border border-coral-300 px-3 py-1 rounded-full active:scale-95 transition-transform"
                   >
                     seen
                   </button>
@@ -96,7 +96,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                 {s.status !== 'open' && (
                   <button
                     onClick={() => updateStatus(s.id, 'open')}
-                    className="text-[11px] font-medium text-[#1A0A00]/40 px-2 py-1 active:scale-95 transition-transform"
+                    className="text-sm font-medium text-[#1A0A00]/40 px-2 py-1 active:scale-95 transition-transform"
                   >
                     undo
                   </button>

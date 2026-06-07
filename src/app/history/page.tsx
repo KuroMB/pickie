@@ -111,10 +111,10 @@ export default async function HistoryPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl leading-none flex-shrink-0">{meal.emoji ?? '🍽️'}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-[#1A0A00] leading-tight truncate">
+                        <p className="text-base font-medium text-[#1A0A00] leading-tight truncate">
                           {meal.name}
                         </p>
-                        <p className="text-[11px] text-[#1A0A00]/35 mt-0.5">
+                        <p className="text-sm text-[#1A0A00]/35 mt-0.5">
                           {formatHistoryDate(meal.scheduled_date)}
                         </p>
                       </div>
@@ -127,7 +127,7 @@ export default async function HistoryPage() {
                           .map((r) => (
                             <div
                               key={r.user_id}
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${scoreColor(r.score)}`}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium ${scoreColor(r.score)}`}
                             >
                               <span>{scoreEmoji(r.score)}</span>
                               <span>{r.rater?.name ?? 'someone'}</span>
@@ -137,7 +137,7 @@ export default async function HistoryPage() {
                           ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#1A0A00]/25 mt-1">no ratings</p>
+                      <p className="text-sm text-[#1A0A00]/25 mt-1">no ratings</p>
                     )}
                   </div>
                 ))}

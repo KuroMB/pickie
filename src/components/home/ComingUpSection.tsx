@@ -84,7 +84,7 @@ export default function ComingUpSection({
           <div key={dateStr}>
             <div className="flex items-center gap-2 py-2">
               <div className="h-px flex-1 bg-coral-100" />
-              <span className="text-[11px] font-medium text-[#1A0A00]/35 uppercase tracking-widest whitespace-nowrap">
+              <span className="text-xs font-medium text-[#1A0A00]/35 uppercase tracking-widest whitespace-nowrap">
                 {formatAgendaLabel(dateStr)} · {formatAgendaShortDate(dateStr)}
               </span>
               <div className="h-px flex-1 bg-coral-100" />

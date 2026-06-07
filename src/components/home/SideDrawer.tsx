@@ -91,12 +91,12 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
                 {initial}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#1A0A00] truncate">{profile.name}</p>
-                <p className="text-xs text-[#1A0A00]/40 truncate">{profile.email}</p>
+                <p className="text-base font-semibold text-[#1A0A00] truncate">{profile.name}</p>
+                <p className="text-sm text-[#1A0A00]/40 truncate">{profile.email}</p>
               </div>
             </div>
             {household && (
-              <p className="text-xs text-[#1A0A00]/40 mt-2 pl-1">
+              <p className="text-sm text-[#1A0A00]/40 mt-2 pl-1">
                 {household.name} · {profile.role}
               </p>
             )}
@@ -114,7 +114,7 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
                   <CopyLinkRow label="planner link (full edit access)" url={plannerInviteUrl} />
                 )}
               </div>
-              <p className="text-[11px] text-[#1A0A00]/30 mt-3 leading-relaxed">
+              <p className="text-xs text-[#1A0A00]/30 mt-3 leading-relaxed">
                 share this link — they'll be added to {household.name} automatically after signing in.
               </p>
             </div>
