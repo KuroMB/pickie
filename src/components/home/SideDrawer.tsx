@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import type { Profile } from '@/lib/types'
 
 interface SideDrawerProps {
@@ -90,12 +91,12 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
                 {initial}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#1A0A00] truncate">{profile.name}</p>
-                <p className="text-xs text-[#1A0A00]/40 truncate">{profile.email}</p>
+                <p className="text-base font-semibold text-[#1A0A00] truncate">{profile.name}</p>
+                <p className="text-sm text-[#1A0A00]/40 truncate">{profile.email}</p>
               </div>
             </div>
             {household && (
-              <p className="text-xs text-[#1A0A00]/40 mt-2 pl-1">
+              <p className="text-sm text-[#1A0A00]/40 mt-2 pl-1">
                 {household.name} · {profile.role}
               </p>
             )}
@@ -113,15 +114,39 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
                   <CopyLinkRow label="planner link (full edit access)" url={plannerInviteUrl} />
                 )}
               </div>
-              <p className="text-[11px] text-[#1A0A00]/30 mt-3 leading-relaxed">
+              <p className="text-xs text-[#1A0A00]/30 mt-3 leading-relaxed">
                 share this link — they'll be added to {household.name} automatically after signing in.
               </p>
             </div>
           )}
         </div>
 
+        {/* nav links */}
+        <div className="px-5 pb-4 border-t border-coral-100 pt-4 space-y-1">
+          <Link
+            href="/history"
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#1A0A00]/60 hover:bg-coral-50 active:bg-coral-100 transition-colors"
+          >
+            <svg className="w-4 h-4 text-[#1A0A00]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            meal history
+          </Link>
+          <Link
+            href="/insights"
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#1A0A00]/60 hover:bg-coral-50 active:bg-coral-100 transition-colors"
+          >
+            <svg className="w-4 h-4 text-[#1A0A00]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            family insights
+          </Link>
+        </div>
+
         {/* sign out */}
-        <div className="px-5 pb-8 pt-4 border-t border-coral-100">
+        <div className="px-5 pb-8 pt-2 border-t border-coral-100">
           <button
             onClick={onSignOut}
             className="w-full py-2.5 text-sm font-medium text-[#1A0A00]/50 border border-[#1A0A00]/10 rounded-xl active:scale-[0.98] transition-transform"

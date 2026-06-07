@@ -33,10 +33,7 @@ export default async function InvitePage({ params }: { params: { code: string } 
       .single()
 
     if (!profile?.household_id) {
-      await supabase
-        .from('profiles')
-        .update({ household_id: household.id, role })
-        .eq('id', user.id)
+      await supabase.rpc('join_household_with_code', { p_code: code })
     }
 
     redirect('/home')

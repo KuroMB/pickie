@@ -22,12 +22,12 @@ export default function TaskItem({ task, claimerName, currentUserId, onClaim, ca
             isClaimed ? 'bg-coral-400' : 'bg-coral-200'
           }`}
         />
-        <span className="text-sm text-[#1A0A00]/80 truncate">{task.label}</span>
+        <span className="text-base text-[#1A0A00]/80 truncate">{task.label}</span>
       </div>
       <div className="flex-shrink-0 ml-3">
         {isClaimed ? (
           <span
-            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            className={`text-sm font-medium px-2 py-0.5 rounded-full ${
               isMine
                 ? 'bg-coral-400 text-white'
                 : 'bg-coral-100 text-coral-400'
@@ -38,12 +38,12 @@ export default function TaskItem({ task, claimerName, currentUserId, onClaim, ca
         ) : canClaim ? (
           <button
             onClick={() => onClaim(task.id)}
-            className="text-xs font-medium text-coral-400 border border-coral-300 px-3 py-1 rounded-full active:scale-95 transition-transform"
+            className="text-sm font-medium text-coral-400 border border-coral-300 px-3 py-1 rounded-full active:scale-95 transition-transform"
           >
             claim it
           </button>
         ) : (
-          <span className="text-xs text-[#1A0A00]/30">not claimed yet</span>
+          <span className="text-sm text-[#1A0A00]/30">not claimed yet</span>
         )}
       </div>
     </div>

@@ -10,13 +10,14 @@ export async function GET(request: Request) {
     const supabase = createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      if (next) {
-        // invite flow: stay signed in, land on the invite page to auto-join
-        return NextResponse.redirect(`${origin}${next}`)
-      }
-      // regular signup: sign out so user goes through the sign-in step
+      // Always sign out after confirmation so the user signs in fresh in their
+      // main browser. This avoids PKCE cookie mismatch when the confirmation
+      // email is opened in a webview (Gmail, etc.) that has no code-verifier.
       await supabase.auth.signOut()
-      return NextResponse.redirect(`${origin}/login?confirmed=1`)
+      const loginUrl = new URL('/login', origin)
+      loginUrl.searchParams.set('confirmed', '1')
+      if (next) loginUrl.searchParams.set('next', next)
+      return NextResponse.redirect(loginUrl.toString())
     }
   }
 
