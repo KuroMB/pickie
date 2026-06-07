@@ -13,12 +13,14 @@ const STATUS_LABEL: Record<SuggestionStatus, string> = {
   open: '',
   noted: 'noted',
   added: 'added to rotation',
+  declined: 'declined',
 }
 
 const STATUS_STYLE: Record<SuggestionStatus, string> = {
   open: '',
   noted: 'bg-amber-100 text-amber-700',
   added: 'bg-coral-100 text-coral-500',
+  declined: 'bg-[#1A0A00]/8 text-[#1A0A00]/40',
 }
 
 export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: SuggestionInboxProps) {
