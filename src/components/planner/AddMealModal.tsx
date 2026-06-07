@@ -14,7 +14,7 @@ interface AddMealModalProps {
   onAdded: () => void
 }
 
-const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔','🌯','🥪','🍖','🧑‍🍳','🍟','🥚']
+const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔','🌯','🥪','🍖','🍟','🥚']
 
 const inputClass = 'w-full min-w-0 appearance-none px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30'
 const labelClass = 'block text-base font-medium text-[#1A0A00]/60 mb-1.5'
@@ -27,6 +27,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
   const [date, setDate] = useState(editMeal?.scheduled_date ?? initialDate ?? today)
   const [cookTime, setCookTime] = useState(editMeal?.cook_time_minutes?.toString() ?? '')
   const [customTasks, setCustomTasks] = useState(DEFAULT_TASK_LABELS.join('\n'))
+  const [showCustomEmoji, setShowCustomEmoji] = useState(!EMOJI_SUGGESTIONS.includes(editMeal?.emoji ?? ''))
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
 
@@ -117,7 +118,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
                 <button
                   key={e}
                   type="button"
-                  onClick={() => setEmoji(e)}
+                  onClick={() => { setEmoji(e); setShowCustomEmoji(false) }}
                   className={`text-2xl p-1.5 rounded-lg border transition-all ${
                     emoji === e ? 'border-coral-400 bg-coral-100' : 'border-coral-100 bg-coral-50'
                   }`}
@@ -125,15 +126,27 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
                   {e}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => setShowCustomEmoji(true)}
+                className={`text-base font-bold p-1.5 w-10 h-10 rounded-lg border transition-all flex items-center justify-center ${
+                  showCustomEmoji ? 'border-coral-400 bg-coral-100 text-coral-500' : 'border-coral-100 bg-coral-50 text-[#1A0A00]/40'
+                }`}
+              >
+                +
+              </button>
             </div>
-            <input
-              type="text"
-              value={emoji}
-              onChange={(e) => setEmoji(e.target.value)}
-              placeholder="or type any emoji"
-              maxLength={4}
-              className={inputClass}
-            />
+            {showCustomEmoji && (
+              <input
+                type="text"
+                value={EMOJI_SUGGESTIONS.includes(emoji) ? '' : emoji}
+                onChange={(e) => setEmoji(e.target.value)}
+                placeholder="type or paste any emoji"
+                maxLength={4}
+                autoFocus
+                className={inputClass}
+              />
+            )}
           </div>
 
           <div>
