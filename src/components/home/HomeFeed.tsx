@@ -112,7 +112,10 @@ export default function HomeFeed({
       {/* header */}
       <div className="sticky top-0 z-10 bg-coral-50/95 backdrop-blur-sm border-b border-coral-100">
         <div className="max-w-mobile mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-coral-400 tracking-tight">pickie</h1>
+          <div className="flex flex-col leading-none gap-0.5">
+            <span className="text-3xl font-bold text-coral-300 tracking-tight">pickie.</span>
+            <span className="text-2xl font-medium text-coral-300/70 tracking-tight">eating. simplified.</span>
+          </div>
           <div className="flex items-center gap-2">
             {isPlanner && (
               <button
