@@ -133,6 +133,16 @@ export default function SideDrawer({ profile, onClose, onSignOut }: SideDrawerPr
             </svg>
             meal history
           </Link>
+          <Link
+            href="/insights"
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#1A0A00]/60 hover:bg-coral-50 active:bg-coral-100 transition-colors"
+          >
+            <svg className="w-4 h-4 text-[#1A0A00]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            family insights
+          </Link>
         </div>
 
         {/* sign out */}
