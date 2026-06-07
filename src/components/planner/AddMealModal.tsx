@@ -16,6 +16,9 @@ interface AddMealModalProps {
 
 const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔']
 
+const inputClass = 'w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30'
+const labelClass = 'block text-sm font-medium text-[#1A0A00]/60 mb-1.5'
+
 export default function AddMealModal({ householdId, userId, editMeal, initialDate, onClose, onAdded }: AddMealModalProps) {
   const today = getLocalDateString(0)
   const [name, setName] = useState(editMeal?.name ?? '')
@@ -86,7 +89,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
       <div className="w-full max-w-mobile bg-white rounded-t-3xl px-5 pt-5 pb-safe max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold">{editMeal ? 'edit meal' : 'add a meal'}</h2>
+          <h2 className="text-xl font-bold">{editMeal ? 'edit meal' : 'add a meal'}</h2>
           <button onClick={onClose} className="text-[#1A0A00]/40 p-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -96,26 +99,26 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
 
         <form onSubmit={save} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">meal name</label>
+            <label className={labelClass}>meal name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="e.g. Spaghetti Bolognese"
-              className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">emoji</label>
+            <label className={labelClass}>emoji</label>
             <div className="flex gap-2 flex-wrap mb-2">
               {EMOJI_SUGGESTIONS.map((e) => (
                 <button
                   key={e}
                   type="button"
                   onClick={() => setEmoji(e)}
-                  className={`text-xl p-1.5 rounded-lg border transition-all ${
+                  className={`text-2xl p-1.5 rounded-lg border transition-all ${
                     emoji === e ? 'border-coral-400 bg-coral-100' : 'border-coral-100 bg-coral-50'
                   }`}
                 >
@@ -129,57 +132,59 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
               onChange={(e) => setEmoji(e.target.value)}
               placeholder="or type any emoji"
               maxLength={4}
-              className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">
-              short description <span className="text-[#1A0A00]/30">(optional)</span>
+            <label className={labelClass}>
+              short description <span className="text-[#1A0A00]/30 font-normal">(optional)</span>
             </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. with garlic bread and salad"
-              className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+              className={inputClass}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">date</label>
-              <input
-                type="date"
-                value={date}
-                min={editMeal ? undefined : today}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">cook time</label>
+          <div>
+            <label className={labelClass}>date</label>
+            <input
+              type="date"
+              value={date}
+              min={editMeal ? undefined : today}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className={inputClass}
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>cook time <span className="text-[#1A0A00]/30 font-normal">(optional)</span></label>
+            <div className="flex items-center gap-3">
               <input
                 type="number"
                 value={cookTime}
                 onChange={(e) => setCookTime(e.target.value)}
-                placeholder="mins"
+                placeholder="e.g. 45"
                 min={5}
                 max={480}
-                className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30"
+                className={inputClass}
               />
+              <span className="text-base text-[#1A0A00]/40 flex-shrink-0">mins</span>
             </div>
           </div>
 
           {!editMeal && (
             <div>
-              <label className="block text-xs font-medium text-[#1A0A00]/60 mb-1.5">tasks (one per line)</label>
+              <label className={labelClass}>tasks <span className="text-[#1A0A00]/30 font-normal">(one per line)</span></label>
               <textarea
                 value={customTasks}
                 onChange={(e) => setCustomTasks(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-sm focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 resize-none"
+                className={`${inputClass} resize-none`}
               />
             </div>
           )}
@@ -188,14 +193,14 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-coral-200 text-[#1A0A00]/70 font-medium rounded-xl text-sm active:scale-[0.98] transition-transform"
+              className="flex-1 py-3 border border-coral-200 text-[#1A0A00]/70 font-medium rounded-xl text-base active:scale-[0.98] transition-transform"
             >
               cancel
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="flex-1 py-3 bg-coral-400 text-white font-medium rounded-xl text-sm disabled:opacity-50 active:scale-[0.98] transition-transform"
+              className="flex-1 py-3 bg-coral-400 text-white font-medium rounded-xl text-base disabled:opacity-50 active:scale-[0.98] transition-transform"
             >
               {saving ? '…' : editMeal ? 'save changes' : 'add meal'}
             </button>
