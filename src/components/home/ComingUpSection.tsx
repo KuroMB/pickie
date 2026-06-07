@@ -53,7 +53,7 @@ export default function ComingUpSection({
   if (visibleDates.length === 0) {
     return (
       <div className="mx-4 mb-4">
-        <p className="text-xs font-medium text-[#1A0A00]/40 uppercase tracking-widest mb-3">coming up</p>
+        <p className="text-xs font-semibold text-coral-500 uppercase tracking-widest mb-3">coming up</p>
         <div className="bg-coral-50 rounded-2xl px-4 py-8 text-center border border-coral-100">
           <p className="text-sm text-[#1A0A00]/40">nothing planned yet</p>
         </div>
@@ -64,7 +64,7 @@ export default function ComingUpSection({
   return (
     <div className="mx-4 mb-4">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-xs font-medium text-[#1A0A00]/40 uppercase tracking-widest">coming up</p>
+        <p className="text-xs font-semibold text-coral-500 uppercase tracking-widest">coming up</p>
         {isPlanner && (
           <button
             onClick={() => onAddMeal()}
@@ -84,7 +84,7 @@ export default function ComingUpSection({
           <div key={dateStr}>
             <div className="flex items-center gap-2 py-2">
               <div className="h-px flex-1 bg-coral-100" />
-              <span className="text-xs font-medium text-[#1A0A00]/35 uppercase tracking-widest whitespace-nowrap">
+              <span className="text-xs font-semibold text-coral-400 uppercase tracking-widest whitespace-nowrap">
                 {formatAgendaLabel(dateStr)} · {formatAgendaShortDate(dateStr)}
               </span>
               <div className="h-px flex-1 bg-coral-100" />

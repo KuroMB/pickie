@@ -14,10 +14,10 @@ interface AddMealModalProps {
   onAdded: () => void
 }
 
-const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔']
+const EMOJI_SUGGESTIONS = ['🍕','🍣','🌮','🍝','🥘','🍔','🍜','🥗','🍗','🫕','🥩','🐟','🍛','🥦','🫔','🌯','🥪','🍖','🧑‍🍳','🍟','🥚']
 
-const inputClass = 'w-full px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30'
-const labelClass = 'block text-sm font-medium text-[#1A0A00]/60 mb-1.5'
+const inputClass = 'w-full min-w-0 appearance-none px-4 py-3 rounded-xl border border-coral-200 bg-coral-50 text-base focus:outline-none focus:ring-2 focus:ring-coral-400/30 focus:border-coral-400 placeholder:text-[#1A0A00]/30'
+const labelClass = 'block text-base font-medium text-[#1A0A00]/60 mb-1.5'
 
 export default function AddMealModal({ householdId, userId, editMeal, initialDate, onClose, onAdded }: AddMealModalProps) {
   const today = getLocalDateString(0)
@@ -89,7 +89,7 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
       <div className="w-full max-w-mobile bg-white rounded-t-3xl px-5 pt-5 pb-safe max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold">{editMeal ? 'edit meal' : 'add a meal'}</h2>
+          <h2 className="text-2xl font-bold">{editMeal ? 'edit meal' : 'add a meal'}</h2>
           <button onClick={onClose} className="text-[#1A0A00]/40 p-1">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -151,14 +151,16 @@ export default function AddMealModal({ householdId, userId, editMeal, initialDat
 
           <div>
             <label className={labelClass}>date</label>
-            <input
-              type="date"
-              value={date}
-              min={editMeal ? undefined : today}
-              onChange={(e) => setDate(e.target.value)}
-              required
-              className={inputClass}
-            />
+            <div className="overflow-hidden rounded-xl">
+              <input
+                type="date"
+                value={date}
+                min={editMeal ? undefined : today}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </div>
           </div>
 
           <div>
