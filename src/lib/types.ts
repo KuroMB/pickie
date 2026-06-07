@@ -2,7 +2,7 @@ export type Role = 'planner' | 'member'
 export type MealType = 'dinner' | 'breakfast' | 'lunch'
 export type VoteValue = 'love' | 'meh' | 'nope'
 export type SuggestionType = 'remix' | 'general'
-export type SuggestionStatus = 'open' | 'noted' | 'added'
+export type SuggestionStatus = 'open' | 'noted' | 'added' | 'declined'
 export type NotificationType = 'new_meal' | 'rating_reminder' | 'ad_hoc_poll'
 export type MealState = 'upcoming' | 'tomorrow' | 'tonight' | 'lastnight' | 'archived'
 
@@ -81,9 +81,46 @@ export interface Suggestion {
   status: SuggestionStatus
   upvotes: number
   created_at: string
+  suggested_date?: string | null
+  suggested_emoji?: string | null
+  suggested_description?: string | null
+  suggested_cook_time_minutes?: number | null
   submitter?: Profile
   meal?: Meal | null
   hasUpvoted?: boolean
+}
+
+export interface AppNotification {
+  id: string
+  user_id: string
+  household_id: string
+  type: string
+  title: string
+  body: string | null
+  url: string | null
+  read: boolean
+  created_at: string
+}
+
+export interface Poll {
+  id: string
+  household_id: string
+  created_by: string
+  question: string
+  option_a: string
+  option_b: string
+  closed: boolean
+  created_at: string
+  responses?: PollResponse[]
+}
+
+export interface PollResponse {
+  id: string
+  poll_id: string
+  user_id: string
+  household_id: string
+  choice: 'a' | 'b'
+  created_at: string
 }
 
 export interface SuggestionUpvote {

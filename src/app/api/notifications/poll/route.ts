@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { sendAdHocPollEmail } from '@/lib/resend'
+import { notifyAndPush } from '@/lib/push'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -32,8 +33,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ sent: 0 })
   }
 
-  const pollId = crypto.randomUUID()
-  await sendAdHocPollEmail(members, question, optionA, optionB, pollId)
+  const { data: poll, error: pollErr } = await service
+    .from('polls')
+    .insert({
+      household_id: profile.household_id,
+      created_by: user.id,
+      question,
+      option_a: optionA,
+      option_b: optionB,
+    })
+    .select()
+    .single()
+  if (pollErr || !poll) return NextResponse.json({ error: 'failed to create poll' }, { status: 500 })
+
+  const { data: memberProfiles } = await service
+    .from('profiles')
+    .select('id, household_id')
+    .eq('household_id', profile.household_id)
+    .neq('id', user.id)
+
+  await Promise.all([
+    sendAdHocPollEmail(members, question, optionA, optionB, poll.id),
+    ...(memberProfiles ?? []).map((m) =>
+      notifyAndPush({
+        userId: m.id,
+        householdId: m.household_id,
+        type: 'new_poll',
+        title: '📨 New poll',
+        body: question,
+        url: '/home',
+      })
+    ),
+  ])
 
   await service.from('notification_log').insert({
     household_id: profile.household_id,

@@ -14,13 +14,15 @@
     "react-dom": "^18",
     "@supabase/supabase-js": "^2.43.4",
     "@supabase/ssr": "^0.3.0",
-    "resend": "^3.2.0"
+    "resend": "^3.2.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/web-push": "^3.6.4",
     "tailwindcss": "^3.4.1",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",

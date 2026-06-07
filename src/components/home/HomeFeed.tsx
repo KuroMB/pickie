@@ -8,10 +8,12 @@ import TonightHeroCard from './TonightHeroCard'
 import ComingUpSection from './ComingUpSection'
 import SuggestionInbox from './SuggestionInbox'
 import SuggestionFooter from './SuggestionFooter'
+import PollCard from './PollCard'
 import AddMealModal from '@/components/planner/AddMealModal'
 import AdHocPollModal from '@/components/planner/AdHocPollModal'
 import SideDrawer from './SideDrawer'
-import type { Profile, Meal, Suggestion, MealWithState } from '@/lib/types'
+import NotificationBell from './NotificationBell'
+import type { Profile, Meal, Suggestion, MealWithState, Poll } from '@/lib/types'
 import { getLocalDateString } from '@/lib/utils'
 
 interface HomeFeedProps {
@@ -19,6 +21,7 @@ interface HomeFeedProps {
   initialMeals: Meal[]
   initialSuggestions: Suggestion[]
   initialProfiles: Profile[]
+  initialPolls: Poll[]
 }
 
 export default function HomeFeed({
@@ -26,11 +29,15 @@ export default function HomeFeed({
   initialMeals,
   initialSuggestions,
   initialProfiles,
+  initialPolls,
 }: HomeFeedProps) {
   const [meals, setMeals] = useState<Meal[]>(initialMeals)
   const [suggestions, setSuggestions] = useState<Suggestion[]>(initialSuggestions)
   const [profiles, setProfiles] = useState<Profile[]>(initialProfiles)
+  const [polls, setPolls] = useState<Poll[]>(initialPolls)
   const [showAddMeal, setShowAddMeal] = useState(false)
+  const [addMealDate, setAddMealDate] = useState<string | undefined>(undefined)
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [showPoll, setShowPoll] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
   const supabase = createClient()
@@ -39,11 +46,27 @@ export default function HomeFeed({
   const isPlanner = profile.role === 'planner'
   const householdId = profile.household_id!
 
+  // Register service worker and subscribe to push notifications
+  useEffect(() => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+    navigator.serviceWorker.register('/sw.js').then(async (reg) => {
+      const existing = await reg.pushManager.getSubscription()
+      if (existing) return
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidKey) return
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey })
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub }),
+      })
+    }).catch(() => {})
+  }, [])
+
   const reload = useCallback(async () => {
-    const today = getLocalDateString(0)
     const yesterday = getLocalDateString(-1)
 
-    const [mealsRes, suggestionsRes, profilesRes] = await Promise.all([
+    const [mealsRes, suggestionsRes, profilesRes, pollsRes] = await Promise.all([
       supabase
         .from('meals')
         .select('*, tasks(*), votes(*), ratings(*)')
@@ -59,11 +82,18 @@ export default function HomeFeed({
         .from('profiles')
         .select('*')
         .eq('household_id', householdId),
+      supabase
+        .from('polls')
+        .select('*, responses:poll_responses(*)')
+        .eq('household_id', householdId)
+        .eq('closed', false)
+        .order('created_at', { ascending: false }),
     ])
 
     if (mealsRes.data) setMeals(mealsRes.data as Meal[])
     if (suggestionsRes.data) setSuggestions(suggestionsRes.data as Suggestion[])
     if (profilesRes.data) setProfiles(profilesRes.data as Profile[])
+    if (pollsRes.data) setPolls(pollsRes.data as Poll[])
   }, [supabase, householdId])
 
   // real-time subscriptions
@@ -75,10 +105,17 @@ export default function HomeFeed({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'suggestions', filter: `household_id=eq.${householdId}` }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'meals', filter: `household_id=eq.${householdId}` }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ratings', filter: `household_id=eq.${householdId}` }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'polls', filter: `household_id=eq.${householdId}` }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'poll_responses', filter: `household_id=eq.${householdId}` }, reload)
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [supabase, householdId, reload])
+
+  const today = getLocalDateString(0)
+  const pendingSuggestions = suggestions.filter(
+    (s) => s.status === 'open' && s.suggested_date != null && s.suggested_date >= today
+  )
 
   const enriched: MealWithState[] = meals.map((m) => enrichMeal(m, profile.id))
 
@@ -97,7 +134,10 @@ export default function HomeFeed({
       {/* header */}
       <div className="sticky top-0 z-10 bg-coral-50/95 backdrop-blur-sm border-b border-coral-100">
         <div className="max-w-mobile mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-coral-400 tracking-tight">pickie</h1>
+          <div className="flex flex-col leading-none gap-1">
+            <span className="text-3xl font-bold text-coral-300 tracking-tight">pickie</span>
+            <span className="text-base font-medium text-coral-300/70 tracking-tight">eating, simplified</span>
+          </div>
           <div className="flex items-center gap-2">
             {isPlanner && (
               <button
@@ -107,6 +147,7 @@ export default function HomeFeed({
                 <span>📨</span> poll
               </button>
             )}
+            <NotificationBell userId={profile.id} householdId={householdId} />
             <button
               onClick={() => setShowDrawer(true)}
               aria-label="menu"
@@ -134,14 +175,18 @@ export default function HomeFeed({
             meal={tonightMeal}
             profiles={profiles}
             userId={profile.id}
+            isPlanner={isPlanner}
             onUpdate={reload}
+            onEdit={setEditingMeal}
           />
         ) : tomorrowMeal ? (
           <TonightHeroCard
             meal={tomorrowMeal}
             profiles={profiles}
             userId={profile.id}
+            isPlanner={isPlanner}
             onUpdate={reload}
+            onEdit={setEditingMeal}
           />
         ) : (
           <div className="mx-4 mb-4">
@@ -152,14 +197,27 @@ export default function HomeFeed({
           </div>
         )}
 
+        {polls.map((poll) => (
+          <PollCard
+            key={poll.id}
+            poll={poll}
+            userId={profile.id}
+            householdId={householdId}
+            isPlanner={isPlanner}
+            onUpdate={reload}
+          />
+        ))}
+
         <ComingUpSection
           meals={upcomingMeals}
           userId={profile.id}
           householdId={householdId}
           isPlanner={isPlanner}
           profiles={profiles}
-          onAddMeal={() => setShowAddMeal(true)}
+          pendingSuggestions={pendingSuggestions}
+          onAddMeal={(date) => { setAddMealDate(date); setShowAddMeal(true) }}
           onUpdate={reload}
+          onEditMeal={setEditingMeal}
         />
 
         <SuggestionInbox
@@ -179,8 +237,19 @@ export default function HomeFeed({
         <AddMealModal
           householdId={householdId}
           userId={profile.id}
-          onClose={() => setShowAddMeal(false)}
+          initialDate={addMealDate}
+          onClose={() => { setShowAddMeal(false); setAddMealDate(undefined) }}
           onAdded={reload}
+        />
+      )}
+
+      {editingMeal && (
+        <AddMealModal
+          householdId={householdId}
+          userId={profile.id}
+          editMeal={editingMeal}
+          onClose={() => setEditingMeal(null)}
+          onAdded={() => { reload(); setEditingMeal(null) }}
         />
       )}
 

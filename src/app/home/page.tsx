@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import HomeFeed from '@/components/home/HomeFeed'
-import type { Meal, Suggestion, Profile } from '@/lib/types'
+import type { Meal, Suggestion, Profile, Poll } from '@/lib/types'
 import { getLocalDateString } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +22,7 @@ export default async function HomePage() {
   const householdId = profile.household_id
   const yesterday = getLocalDateString(-1)
 
-  const [mealsRes, suggestionsRes, profilesRes] = await Promise.all([
+  const [mealsRes, suggestionsRes, profilesRes, pollsRes] = await Promise.all([
     supabase
       .from('meals')
       .select('*, tasks(*), votes(*), ratings(*)')
@@ -38,6 +38,12 @@ export default async function HomePage() {
       .from('profiles')
       .select('*')
       .eq('household_id', householdId),
+    supabase
+      .from('polls')
+      .select('*, responses:poll_responses(*)')
+      .eq('household_id', householdId)
+      .eq('closed', false)
+      .order('created_at', { ascending: false }),
   ])
 
   return (
@@ -46,6 +52,7 @@ export default async function HomePage() {
       initialMeals={(mealsRes.data ?? []) as Meal[]}
       initialSuggestions={(suggestionsRes.data ?? []) as Suggestion[]}
       initialProfiles={(profilesRes.data ?? []) as Profile[]}
+      initialPolls={(pollsRes.data ?? []) as Poll[]}
     />
   )
 }

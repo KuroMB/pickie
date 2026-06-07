@@ -61,7 +61,7 @@ export default function SuggestionInbox({ suggestions, isPlanner, onUpdate }: Su
                   </span>
                   {' · '}
                   {s.type === 'remix' ? (
-                    <>remix · <span className="italic">{s.meal?.name}</span></>
+                    <>variation · <span className="italic">{s.meal?.name}</span></>
                   ) : (
                     'general'
                   )}

@@ -1,8 +1,8 @@
 {
   "name": "pickie",
   "short_name": "pickie",
-  "description": "family dinner planning, together",
-  "start_url": "/",
+  "description": "eating, simplified",
+  "start_url": "/home",
   "display": "standalone",
   "background_color": "#FFF8F5",
   "theme_color": "#D85A30",
