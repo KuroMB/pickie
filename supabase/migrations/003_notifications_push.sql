@@ -14,7 +14,7 @@ create index notifications_user_unread_idx on notifications(user_id, read, creat
 alter table notifications enable row level security;
 create policy "users can view own notifications" on notifications for select using (user_id = auth.uid());
 create policy "users can update own notifications" on notifications for update using (user_id = auth.uid());
-create policy "service role can insert notifications" on notifications for insert with check (true);
+-- No INSERT policy needed: service role bypasses RLS, and clients should never insert notifications directly.
 
 -- Push subscriptions
 create table push_subscriptions (
